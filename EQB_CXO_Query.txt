@@ -1,0 +1,129 @@
+SELECT
+		 "zoho_client_master"."Client ID Final" as "Created Clients",
+		 "zoho_client_master"."Client_Name" as "Client_Name",
+		 "zoho_client_master"."Online_Offline" as "Online_Offline",
+		 "InvestorView"."isNRI" as "isNRI",
+		 "InvestorView"."WM_send" as `WM_Send`,
+		 "InvestorView"."uccStatus" as "uccStatus",
+		 "zoho_client_master"."Cl_Status" as "Cl_Status",
+		 "zoho_client_master"."Cl_Status2" as "Cl_Status2",
+		 "zoho_client_master"."Age_Bracket" as "Age_Bracket",
+		 "zoho_client_master"."First_Agreement_Date" as "First_Agreement_Date",
+		 if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date") as 'Client_Creation_Date',
+		 "Active_first_trade_date"."first_trade_date" as 'FTD',
+		 "zoho_client_master"."Branch/Franchise" as "Branch/Franchise",
+		 if("zoho_client_master"."Client ID Final"  = "Digital Marketing 24-25"."ZCM Client", 'Digital', null) as 'Digital',
+		 if("zoho_client_master"."Branch_name updated"  in ( 'MUMBAI-INSTITUTION'  ), 'INSTITUTIONAL', if("zoho_client_master"."Client ID Final"  = "Digital Marketing 24-25"."ZCM Client", 'Digital', "zoho_client_master"."Branch/Franchise")) as 'Branch/Franchise/INST/Digital/ArthNirminti',
+		 if("zoho_client_master"."Branch_name updated"  in ( 'MUMBAI-INSTITUTION'  ), 'INSTITUTIONAL', if("zoho_client_master"."PAN"  = "Arthnirmiti Clients"."PAN", 'ArthNirminti', if("zoho_client_master"."Client ID Final"  = "Digital Marketing 24-25"."ZCM Client", 'Digital', "zoho_client_master"."Branch/Franchise"))) as 'Direct/Indirect/Digital/ArthNirminti',
+		 IF(is_previous_week(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date"))  = 1, "zoho_client_master"."Client ID Final", NULL) as 'previous week Created',
+		 if(trim(upper_case("zoho_client_master"."Client ID Final"))  = trim(upper_case("zoho_trade_data"."Client ID  Final")), "zoho_trade_data"."Client ID  Final", null) as 'Overall_Active_Clients',
+		 if(is_previous_nmonth(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date"), 1)  = 1, "zoho_client_master"."Client ID Final", null) as 'Previous_month_Created',
+		 if(trim(upper_Case("zoho_trade_data"."Client ID  Final"))  = trim(upper_case(if(is_previous_nmonth(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date"), 1)  = 1, "zoho_client_master"."Client ID Final", null))), "zoho_trade_data"."Client ID  Final", null) as 'Previous_Traded_Clients',
+		 if(is_current_month(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date"))  = 1, "zoho_client_master"."Client ID Final", null) as 'MTD_Created_Clients',
+		 if(trim(upper_Case("zoho_trade_data"."Client ID  Final"))  = trim(upper_Case(if(is_current_month(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date"))  = 1, "zoho_client_master"."Client ID Final", null))), "zoho_trade_data"."Client ID  Final", null) as 'MTD_Traded_Clients',
+		 if(is_current_quarter(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date"))  = 1, "zoho_client_master"."Client ID Final", null) as 'QTD_Created_Clients',
+		 if(trim(upper_Case("zoho_trade_data"."Client ID  Final"))  = trim(upper_Case(if(is_current_quarter(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date"))  = 1, "zoho_client_master"."Client ID Final", null))), "zoho_trade_data"."Client ID  Final", null) as 'QTD_Traded_Clients',
+		 if(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date")  >= '2025-04-01', "zoho_client_master"."Client ID Final", null) as 'YTD_Created_Clients',
+		 if(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date")  <= '2024-03-31', "zoho_client_master"."Client ID Final", null) as 'Last_Year_Created_Clients',
+		 if(trim(upper_case("zoho_trade_data"."Client ID  Final"))  = trim(upper_case(if(if_null("InvestorView"."WM_send", "zoho_client_master"."First_Agreement_Date")  >= '2025-04-01', "zoho_client_master"."Client ID Final", null))), "zoho_trade_data"."Client ID  Final", null) as 'YTD_Traded_Clients',
+		 "zoho_client_master"."Remesier_Upper" as "ZCM_Remesier_Upper",
+		 "zoho_client_master"."Introducer" as "ZCM_Introducer",
+		 "zoho_cba_data_new"."external_cba_tag" as "external_cba_tag",
+		 "zoho_cba_data_new"."cba_id" as "cba_id",
+		 if("Digital Marketing 24-25"."Original Reffered Validation"  = 'N'
+		 AND	"zoho_client_master"."Search_All_Levels"  like '%C0007276%'
+		 OR	"zoho_client_master"."Search_All_Levels"  like '%83104%', 'Rajeev Bhalla Sir Clients', 'Digital Other') as 'Is Rajeev Sir Client',
+		 "zoho_trade_data"."Tintroducer_Final" as "ZTD_Tintroducer_Final",
+		 "zoho_trade_data"."Client ID  Final" as "Trading Clients",
+		 "zoho_trade_data"."Branch_Franchisee" as "Trading Branch/Franchise",
+		 "zoho_trade_data"."TRADE_DATE" as "TRADE_DATE",
+		 to_string(date("zoho_trade_data"."TRADE_DATE")) as 'Date for Count',
+		 if(is_current_month("zoho_trade_data"."TRADE_DATE")  = 1, to_string(date("zoho_trade_data"."TRADE_DATE")), null) as 'IS Current Month Trading Date',
+		 "zoho_trade_data"."COMPANY_CODE" as "COMPANY_CODE",
+		 if("zoho_trade_data"."Segment_combine"  in ( 'CD_BSE'  ), 'Currency', if("zoho_trade_data"."Segment_combine"  in ( 'NSE_FNO'  , 'BSE_FNO'  ), 'F&O', if("zoho_trade_data"."Segment_combine"  in ( 'NSE_COM'  ), 'Commodity', "zoho_trade_data"."Segment_combine"))) as "Segment_combine",
+		 "zoho_trade_data"."TradeType" as "TradeType",
+		 LAG("zoho_trade_data"."TRADE_DATE") OVER(PARTITION BY "zoho_trade_data"."Client ID  Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" ) AS 'lag',
+		 DATE_diff("zoho_trade_data"."TRADE_DATE", LAG("zoho_trade_data"."TRADE_DATE") OVER(PARTITION BY "zoho_trade_data"."Client ID  Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" )) as 'Diff between 2 trades',
+		 if(DATE_diff("zoho_trade_data"."TRADE_DATE", LAG("zoho_trade_data"."TRADE_DATE") OVER(PARTITION BY "zoho_trade_data"."Client ID  Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" ))  >= 365, "zoho_trade_data"."Client ID  Final", null) as 'Reactivated Client',
+		 if(DATE_diff("zoho_trade_data"."TRADE_DATE", LAG("zoho_trade_data"."TRADE_DATE") OVER(PARTITION BY "zoho_trade_data"."Client ID  Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" ))  >= 365, "zoho_trade_data"."TRADE_DATE", null) as 'Month of Reactivation',
+		 to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC )) as 'Row Number for last trade date',
+		 to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" ASC )) as 'Row Number for first trade date',
+		 if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null) as 'Last_trade_date',
+		 date_Diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null)) as 'Diff',
+		 if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  >= '365', 'Inactive', if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  < '365', 'Active', if("zoho_trade_data"."TRADE_DATE"  is null, 'Not_Traded', null))) as 'Active/Closed/Not_Traded',
+		 if(is_current_month("zoho_trade_data"."TRADE_DATE")  = 1, "zoho_trade_data"."Client ID  Final", null) as 'Overall_MTD_Trade',
+		 if(is_previous_nmonth("zoho_trade_data"."TRADE_DATE", 3)  = 1, "zoho_trade_data"."Client ID  Final", null) as '3_Month_Trade',
+		 if(is_current_quarter("zoho_trade_data"."TRADE_DATE")  = 1, "zoho_trade_data"."Client ID  Final", null) as 'Overall_QTD_Trade',
+		 if("zoho_trade_data"."TRADE_DATE"  >= '2024-04-01', "zoho_trade_data"."Client ID  Final", null) as 'Overall_YTD_Trade',
+		 if(is_previous_nquarter("zoho_trade_data"."TRADE_DATE", 2)  = 1, "zoho_trade_data"."Client ID  Final", null) as 'H1 Traded Clients',
+		 date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null)) as 'differecne',
+		 if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  >= 0
+		 AND	date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  <= 30, "zoho_trade_data"."Client ID  Final", null) as '0-30 days',
+		 if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  >= 31
+		 AND	date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  <= 89, "zoho_trade_data"."Client ID  Final", null) as '30-90 days',
+		 if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  >= 90
+		 AND	date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  <= 179, "zoho_trade_data"."Client ID  Final", null) as '90-180 days',
+		 if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  >= 180
+		 AND	date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  <= 269, "zoho_trade_data"."Client ID  Final", null) as '180-270 days',
+		 if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  >= 270
+		 AND	date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  <= 364, "zoho_trade_data"."Client ID  Final", null) as '270-365 days',
+		 if(date_diff(today(), if(to_string(row_number() over(PARTITION BY "zoho_client_master"."Client ID Final"  ORDER BY "zoho_trade_data"."TRADE_DATE" DESC ))  = 1, "zoho_trade_data"."TRADE_DATE", null))  >= 365, "zoho_trade_data"."Client ID  Final", null) as 'more than 1 Year',
+		 round(("zoho_trade_data"."Brokerage"), 2) as "Brokerage",
+		 round((if(is_previous_nmonth("zoho_trade_data"."TRADE_DATE", 1)  = 1, "zoho_trade_data"."Brokerage", 0)), 2) as 'Previous_month_Gross_Revenue',
+		 round((if(is_current_month("zoho_trade_data"."TRADE_DATE")  = 1, "zoho_trade_data"."Brokerage", 0)), 2) as 'MTD_Gross_Revenue',
+		 round((if(is_current_quarter("zoho_trade_data"."TRADE_DATE")  = 1, "zoho_trade_data"."Brokerage", 0)), 2) as 'QTD_Gross_Revenue',
+		 round((if(is_previous_nquarter("zoho_trade_data"."TRADE_DATE", 1)  = 1, "zoho_trade_data"."Brokerage", 0)), 2) as 'Previous_Quarter_Gross_Revenue',
+		 round((if("zoho_trade_data"."TRADE_DATE"  >= '2025-04-01', "zoho_trade_data"."Brokerage", 0)), 2) as 'YTD_Gross_Revenue',
+		 if("zoho_trade_data"."TRADE_DATE"  >= '2024-04-01'
+		 AND	"zoho_trade_data"."TRADE_DATE"  <= (date(concat_ws('-', year(today()) -1, month(today()), day(today())))), "zoho_trade_data"."Brokerage", 0) as 'Last Year till Date Gross Revenue',
+		 (("zoho_trade_data"."Net Brokerage")) as "Net Brokerage",
+		 round((if(is_previous_nmonth("zoho_trade_data"."TRADE_DATE", 1)  = 1, "zoho_trade_data"."Net Brokerage", 0)), 2) as 'Previous_month_Net_Revenue',
+		 round((if(is_current_month("zoho_trade_data"."TRADE_DATE")  = 1, "zoho_trade_data"."Net Brokerage", 0)), 2) as 'MTD_Net_Revenue',
+		 round((if(is_previous_nmonth("zoho_trade_data"."TRADE_DATE", 3)  = 1, "zoho_trade_data"."Net Brokerage", 0)), 2) as 'last 3 month Revenue',
+		 round((if(is_current_quarter("zoho_trade_data"."TRADE_DATE")  = 1, "zoho_trade_data"."Net Brokerage", 0)), 2) as 'QTD_Net_Revenue',
+		 round((if(is_previous_nquarter("zoho_trade_data"."TRADE_DATE", 1)  = 1, "zoho_trade_data"."Net Brokerage", 0)), 2) as 'Previous_Quarter_Net_Revenue',
+		 round((if(is_previous_nquarter("zoho_trade_data"."TRADE_DATE", 2)  = 1, "zoho_trade_data"."Net Brokerage", 0)), 2) as 'H1_Net_Revenue',
+		 round((if("zoho_trade_data"."TRADE_DATE"  >= '2025-04-01', "zoho_trade_data"."Net Brokerage", 0)), 2) as 'YTD_Net_Revenue',
+		 if("zoho_trade_data"."TRADE_DATE"  >= '2024-04-01'
+		 AND	"zoho_trade_data"."TRADE_DATE"  <= (date(concat_ws('-', year(today()) -1, month(today()), day(today())))), "zoho_trade_data"."Net Brokerage", 0) as 'Last Year till Date Net Revenue',
+		 round((if_null("zoho_trade_data"."Brokerage", 0) -if_null("zoho_trade_data"."Net Brokerage", 0)), 2) as 'Payout',
+		 "Active_first_trade_date"."Gross_Brk" as 'Gross Brokerage Till Date',
+		 "Active_first_trade_date"."Net_brk" as 'Net Brokerage Till Date',
+		 "zoho_client_master"."Branch_name updated" as "Branch_name updated",
+		 "mis branch with Region and State"."STATE" as "STATE",
+		 "Branch with State Head 19-12-2024"."State Head" as "State Head",
+		 "mis branch with Region and State"."REGION" as "REGION"
+FROM  "zoho_client_master"
+LEFT JOIN "Active_first_trade_date" ON trim(upper_Case("Active_first_trade_date"."CLIENT_ID"))  = trim(upper_Case("zoho_client_master"."Client ID Final")) 
+LEFT JOIN "zoho_trade_data" ON trim(upper_Case("zoho_trade_data"."Client ID  Final"))  = trim(upper_Case("zoho_client_master"."Client ID Final")) 
+LEFT JOIN "mis branch with Region and State" ON trim(upper_Case("mis branch with Region and State"."BRANCH"))  = trim(upper_Case("zoho_client_master"."Branch_name updated")) 
+LEFT JOIN(	SELECT DISTINCT
+			 "InvestorView"."clientID_upper" as "clientID_upper",
+			 "InvestorView"."businessUnitName" as "businessUnitName",
+			 "InvestorView"."isNRI" as "isNRI",
+			 "InvestorView"."lid" as "lid",
+			 "InvestorView"."uccStatus" as "uccStatus",
+			 "InvestorView"."leadCityState" as "leadCityState",
+			 "InvestorView"."referredID" as "referredID",
+			 "InvestorView"."WM_send" as `WM_send`,
+			 "InvestorView"."email" As "email",
+			 "InvestorView"."mobileNum" as 'mobileNum',
+			 "InvestorView"."MTF Clients" as "MTF Clients",
+			 if("InvestorView"."kraAgent"  IS NULL, 'N', if("InvestorView"."kraAgent"  IS not NULl, 'Y', null)) AS "kraAgent N",
+			 if("InvestorView"."kraAgent"  IS NOT NULL, "InvestorView"."id", null) AS "kraAgent Y"
+	FROM  "InvestorView" 
+) AS  "InvestorView" ON trim(upper_Case("InvestorView"."clientID_upper"))  = trim(upper_Case("zoho_client_master"."Client ID Final"))
+	 AND	"InvestorView"."businessUnitName"  = 'JF' 
+LEFT JOIN(	SELECT DISTINCT
+			 "Digital Marketing 24-25"."ZCM Client" "ZCM Client",
+			 "Digital Marketing 24-25"."Original Reffered Validation" "Original Reffered Validation"
+	FROM  "Digital Marketing 24-25" 
+	WHERE	 "Digital Marketing 24-25"."newIsOriginalReferValid"  <> 'Y'
+) AS  "Digital Marketing 24-25" ON "Digital Marketing 24-25"."ZCM Client"  = "zoho_client_master"."Client ID Final" 
+LEFT JOIN(	SELECT DISTINCT "FI master Lead Created data"."Client ID Final(Master)" "Client ID Final(Master)"
+	FROM  "FI master Lead Created data" 
+) AS  "FI master Lead Created data" ON trim(upper_case("FI master Lead Created data"."Client ID Final(Master)"))  = trim(upper_Case("zoho_client_master"."Client ID Final")) 
+LEFT JOIN "FI Clients" ON "FI Clients"."Created Clients"  = "zoho_client_master"."Client ID Final" 
+LEFT JOIN "Branch with State Head 19-12-2024" ON trim(upper_case("Branch with State Head 19-12-2024"."Location"))  = trim(upper_Case("zoho_client_master"."Branch_name updated")) 
+LEFT JOIN "zoho_cba_data_new" ON "zoho_cba_data_new"."cba_id"  = "zoho_client_master"."Introducer" 
+LEFT JOIN "Arthnirmiti Clients" ON "Arthnirmiti Clients"."PAN"  = "zoho_client_master"."PAN"  
